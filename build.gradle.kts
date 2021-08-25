@@ -12,6 +12,8 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jsoup:jsoup:1.14.2")
+    implementation("org.json:json:20210307")
     testImplementation(kotlin("test"))
 }
 
