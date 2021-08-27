@@ -2,6 +2,8 @@ import org.json.JSONObject
 import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.URLEncoder
+import java.text.SimpleDateFormat
+import java.util.*
 
 open class TelegramBot(token: String) {
     var messageListener: ((Long, String) -> Unit)? = null
@@ -35,12 +37,16 @@ open class TelegramBot(token: String) {
                     }
                 }
             } catch (e: SocketTimeoutException) {
-                System.err.println(e.message)
+                log(e.message)
             }
         }
     }
 
     companion object {
         const val TIMEOUT = 60
+        private val timeFormat = SimpleDateFormat("HH:mm:ss")
+        fun log(message: String?) {
+            println(timeFormat.format(Date()) + ": " + message)
+        }
     }
 }

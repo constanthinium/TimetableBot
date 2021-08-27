@@ -20,6 +20,7 @@ class TimetableBot(token: String) : TelegramBot(token) {
         val groups = GroupsData.loadGroups()
 
         messageListener = { chatId, message ->
+            Companion.log("Message received: $message")
             val args = message.split(' ')
             val firstWord = args.first()
             if (firstWord.startsWith('/')) {
