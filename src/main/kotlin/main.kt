@@ -6,6 +6,6 @@ fun main() {
     props.load(FileInputStream("gradle.properties"))
     val token = props.getProperty("token")
     val bot = TelegramBot(token)
-    bot.messageListener = { _: Int, text: String -> println("Message received: $text") }
+    bot.messageListener = { chatId: Int, text: String -> bot.sendMessage(chatId, text) }
     bot.receiveMessages()
 }

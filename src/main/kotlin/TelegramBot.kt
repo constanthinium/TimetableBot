@@ -1,11 +1,18 @@
 import org.json.JSONObject
 import java.net.SocketTimeoutException
 import java.net.URL
+import java.net.URLEncoder
 
 class TelegramBot(token: String) {
 
     var messageListener: ((Int, String) -> Unit)? = null
     private val tokenizedUrl = "https://api.telegram.org/bot$token"
+
+    fun sendMessage(chatId: Int, text: String) {
+        val url = "$tokenizedUrl/sendMessage"
+        val query = "chat_id=$chatId&text=${URLEncoder.encode(text, Charsets.UTF_8)}"
+        URL("$url?$query").openStream()
+    }
 
     fun receiveMessages() {
         var offset = 0
