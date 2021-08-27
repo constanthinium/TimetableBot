@@ -1,7 +1,25 @@
 import java.io.FileInputStream
+import java.text.SimpleDateFormat
 import java.util.*
 
 object TimetableBot {
+    private val commands = mapOf<String, (MutableMap<Long, String>, Long, List<String>) -> String>(
+        "group" to { groups, chatId, args ->
+            if (args.size > 1) {
+                val group = args[1]
+                groups[chatId] = group
+                GroupsData.saveGroups(groups)
+                "Группа чата изменена на $group"
+            } else {
+                "Укажите группу чата в аргументе"
+            }
+        }, "today" to { groups, chatId, _ ->
+            groups[chatId]?.let { Timetable.get(it) } ?: "Сначала укажите группу чата"
+        }, "tomorrow" to { groups, chatId, _ ->
+            groups[chatId]?.let { Timetable.get(it, true) } ?: "Сначала укажите группу чата"
+        }
+    )
+
     fun run() {
         val props = Properties()
         props.load(FileInputStream("gradle.properties"))
@@ -11,24 +29,11 @@ object TimetableBot {
         val groups = GroupsData.loadGroups()
 
         bot.messageListener = { chatId, message ->
-            if (message.startsWith("/group")) {
-                val split = message.split(' ')
-                if (split.size > 1) {
-                    val group = split[1]
-                    groups[chatId] = group
-                    GroupsData.saveGroups(groups)
-                    bot.sendMessage(chatId, "Группа чата изменена на $group")
-                } else {
-                    bot.sendMessage(chatId, "Укажите группу чата в аргументе")
-                }
-            } else if (message == "/today") {
-                groups[chatId]?.let {
-                    bot.sendMessage(chatId, Timetable.get(it))
-                } ?: bot.sendMessage(chatId, "Сначала укажите группу чата")
-            } else if (message == "/tomorrow") {
-                groups[chatId]?.let {
-                    bot.sendMessage(chatId, Timetable.get(it, true))
-                } ?: bot.sendMessage(chatId, "Сначала укажите группу чата")
+            val args = message.split(' ')
+            val firstWord = args.first()
+            if (firstWord.startsWith('/')) {
+                commands[firstWord.replaceFirst("/", "")]
+                    ?.let { bot.sendMessage(chatId, it.invoke(groups, chatId, args)) }
             }
         }
 
