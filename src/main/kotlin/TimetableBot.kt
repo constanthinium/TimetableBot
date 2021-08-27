@@ -1,8 +1,4 @@
-import java.io.FileInputStream
-import java.text.SimpleDateFormat
-import java.util.*
-
-object TimetableBot {
+class TimetableBot(token: String) : TelegramBot(token) {
     private val commands = mapOf<String, (MutableMap<Long, String>, Long, List<String>) -> String>(
         "group" to { groups, chatId, args ->
             if (args.size > 1) {
@@ -21,22 +17,17 @@ object TimetableBot {
     )
 
     fun run() {
-        val props = Properties()
-        props.load(FileInputStream("gradle.properties"))
-        val token = props.getProperty("token")
-
-        val bot = TelegramBot(token)
         val groups = GroupsData.loadGroups()
 
-        bot.messageListener = { chatId, message ->
+        messageListener = { chatId, message ->
             val args = message.split(' ')
             val firstWord = args.first()
             if (firstWord.startsWith('/')) {
                 commands[firstWord.replaceFirst("/", "")]
-                    ?.let { bot.sendMessage(chatId, it.invoke(groups, chatId, args)) }
+                    ?.let { sendMessage(chatId, it.invoke(groups, chatId, args)) }
             }
         }
 
-        bot.receiveMessages()
+        receiveMessages()
     }
 }

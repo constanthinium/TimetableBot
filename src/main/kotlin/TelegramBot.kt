@@ -3,8 +3,7 @@ import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.URLEncoder
 
-class TelegramBot(token: String) {
-
+open class TelegramBot(token: String) {
     var messageListener: ((Long, String) -> Unit)? = null
     private val tokenizedUrl = "https://api.telegram.org/bot$token"
 
