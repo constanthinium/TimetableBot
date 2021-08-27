@@ -1,3 +1,11 @@
+import java.io.FileInputStream
+import java.util.*
+
 fun main() {
-    println(Timetable.get("П50-3-18"))
+    val props = Properties()
+    props.load(FileInputStream("gradle.properties"))
+    val token = props.getProperty("token")
+    val bot = TelegramBot(token)
+    bot.messageListener = { _: Int, text: String -> println("Message received: $text") }
+    bot.receiveMessages()
 }
