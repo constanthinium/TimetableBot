@@ -5,10 +5,10 @@ import java.net.URLEncoder
 
 class TelegramBot(token: String) {
 
-    var messageListener: ((Int, String) -> Unit)? = null
+    var messageListener: ((Long, String) -> Unit)? = null
     private val tokenizedUrl = "https://api.telegram.org/bot$token"
 
-    fun sendMessage(chatId: Int, text: String) {
+    fun sendMessage(chatId: Long, text: String) {
         val url = "$tokenizedUrl/sendMessage"
         val query = "chat_id=$chatId&text=${URLEncoder.encode(text, Charsets.UTF_8)}"
         URL("$url?$query").openStream()
@@ -28,7 +28,7 @@ class TelegramBot(token: String) {
                     offset = update.getInt("update_id") + 1
                     if (update.has("message")) {
                         val message = update.getJSONObject("message")
-                        val chatId = message.getJSONObject("from").getInt("id")
+                        val chatId = message.getJSONObject("chat").getLong("id")
                         if (message.has("text")) {
                             val text = message.getString("text")
                             messageListener?.invoke(chatId, text)
