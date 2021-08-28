@@ -24,8 +24,8 @@ open class TelegramBot(token: String) {
                 connection.readTimeout = TIMEOUT * 1000
                 val json = connection.getInputStream().bufferedReader().readText()
                 val result = JSONObject(json).getJSONArray("result")
-                if (!result.isEmpty) {
-                    val update = result.getJSONObject(0)
+                result.forEach { update ->
+                    update as JSONObject
                     offset = update.getInt("update_id") + 1
                     if (update.has("message")) {
                         val message = update.getJSONObject("message")
@@ -33,6 +33,20 @@ open class TelegramBot(token: String) {
                         if (message.has("text")) {
                             val text = message.getString("text")
                             messageListener?.invoke(chatId, text)
+                        }
+                    } else if (update.has("my_chat_member")) {
+                        val status = update.getJSONObject("my_chat_member")
+                        val previous = status.getJSONObject("old_chat_member").getString("status")
+                        val new = status.getJSONObject("new_chat_member").getString("status")
+                        if (previous == "left" && new == "member") {
+                            val chat = status.getJSONObject("chat")
+                            val title = chat.getString("title")
+                            if (Timetable.groupExists(title)) {
+                                val chatId = chat.getLong("id")
+                                sendMessage(chatId, "Устанавливаю группу чата на $title")
+                                GroupsData.groups[chatId] = title
+                                GroupsData.saveGroups()
+                            }
                         }
                     }
                 }
