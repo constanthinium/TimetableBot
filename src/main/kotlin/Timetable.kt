@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object Timetable {
-
     private const val CIRCLE_RED = "🔴"
     private const val CIRCLE_BLUE = "🔵"
 
@@ -22,7 +21,7 @@ object Timetable {
         }
 
         val weekIsEven = calendar.get(Calendar.WEEK_OF_YEAR) % 2 == 0
-        val doc = Jsoup.parse(File("${System.getProperty("user.home")}/Downloads/Расписание занятий.html"), null)
+        val doc = getDoc()
         val dayTrs = doc.select("h3:contains($group) + table > thead:eq(${dayOfWeek - 1}) tr")
         val lessons = dayTrs.drop(2).dropLast(if (dayOfWeek != Calendar.SATURDAY) 1 else 0)
         val dayOfWeekName = SimpleDateFormat("EEEE").format(calendar.time)
@@ -62,4 +61,13 @@ object Timetable {
             }
         }
     }
+
+    fun groupExists(group: String): Boolean {
+        val doc = getDoc()
+        val groups = doc.select("h3").map { it.text().replaceFirst("Группа ", "") }
+        return groups.contains(group)
+    }
+
+    private fun getDoc() =
+        Jsoup.parse(File("${System.getProperty("user.home")}/Downloads/Расписание занятий.html"), null)
 }

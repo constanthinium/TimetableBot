@@ -3,12 +3,12 @@ class TimetableBot(token: String) : TelegramBot(token) {
         "group" to { groups, chatId, args ->
             if (args.size > 1) {
                 val group = args[1]
-                groups[chatId] = group
-                GroupsData.saveGroups(groups)
-                "Группа чата изменена на $group"
-            } else {
-                "Укажите группу чата в аргументе"
-            }
+                if (Timetable.groupExists(group)) {
+                    groups[chatId] = group
+                    GroupsData.saveGroups(groups)
+                    "Группа чата изменена на $group"
+                } else "Такой группы не существует"
+            } else "Укажите группу чата в аргументе"
         }, "today" to { groups, chatId, _ ->
             groups[chatId]?.let { Timetable.get(it) } ?: "Сначала укажите группу чата"
         }, "tomorrow" to { groups, chatId, _ ->

@@ -3,7 +3,6 @@ import org.json.JSONObject
 import java.io.File
 
 object GroupsData {
-
     private const val GROUPS_PATH = "groups.json"
     private const val CHAT_ID = "chat_id"
     private const val GROUP = "group"
