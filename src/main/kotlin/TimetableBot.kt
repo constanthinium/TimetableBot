@@ -5,7 +5,7 @@ class TimetableBot(token: String) : TelegramBot(token) {
                 val group = args[1]
                 if (Timetable.groupExists(group)) {
                     groups[chatId] = group
-                    GroupsData.saveGroups(groups)
+                    GroupsData.saveGroups()
                     "Группа чата изменена на $group"
                 } else "Такой группы не существует"
             } else "Укажите группу чата в аргументе"
@@ -17,15 +17,13 @@ class TimetableBot(token: String) : TelegramBot(token) {
     )
 
     fun run() {
-        val groups = GroupsData.loadGroups()
-
         messageListener = { chatId, message ->
             Companion.log("Message received: $message")
             val args = message.split(' ')
             val firstWord = args.first()
             if (firstWord.startsWith('/')) {
                 commands[firstWord.replaceFirst("/", "")]
-                    ?.let { sendMessage(chatId, it.invoke(groups, chatId, args)) }
+                    ?.let { sendMessage(chatId, it.invoke(GroupsData.groups, chatId, args)) }
             }
         }
 
