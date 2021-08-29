@@ -1,3 +1,7 @@
+import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 class TimetableBot(token: String) : TelegramBot(token) {
     private val commands = mapOf<String, (MutableMap<Long, String>, Long, List<String>) -> String>(
         "group" to { groups, chatId, args ->
@@ -18,7 +22,7 @@ class TimetableBot(token: String) : TelegramBot(token) {
 
     fun run() {
         messageListener = { chatId, message ->
-            Companion.log("Message received: $message")
+            log("Message received: $message")
             val args = message.split(' ')
             val firstWord = args.first()
             if (firstWord.startsWith('/')) {
@@ -27,6 +31,29 @@ class TimetableBot(token: String) : TelegramBot(token) {
             }
         }
 
+        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(
+            {
+                GroupsData.groups.forEach { (chatId, group) ->
+                    sendMessage(chatId, Timetable.get(group, true))
+                }
+            },
+            Calendar.getInstance().apply {
+                if (get(Calendar.HOUR_OF_DAY) >= HOUR) {
+                    add(Calendar.DATE, 1)
+                }
+                set(Calendar.HOUR_OF_DAY, HOUR)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis - Date().time,
+            TimeUnit.DAYS.toMillis(1),
+            TimeUnit.MILLISECONDS
+        )
+
         receiveMessages()
+    }
+
+    companion object {
+        const val HOUR = 22
     }
 }
